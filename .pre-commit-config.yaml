@@ -1,0 +1,19 @@
+default_stages: [commit, push]
+default_language_version:
+  python: python3.9
+repos:
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+    - id: black
+      exclude: ^(venv/|docs/)
+      types: ['python']
+  - repo: https://github.com/PyCQA/pylint
+    rev: v2.13.2
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+

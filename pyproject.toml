@@ -1,0 +1,33 @@
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  | venv/
+  | .idea/
+)/'''
+
+
+[tool.poetry]
+name = "repo_template"
+version = "0.1.0"
+description = "Template description"
+authors = ["Ross <rostikvunarchuk@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+isort = "^5.10.1"
+pytest = "^7.0.0"
+pylint = "^2.13.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.master]
+fail-under = 5.0
