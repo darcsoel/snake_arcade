@@ -18,6 +18,7 @@ authors = ["Ross <rostikvunarchuk@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+arcade = "^2.6.15"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
