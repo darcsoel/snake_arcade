@@ -1,9 +1,9 @@
 import random
+from typing import Tuple
 
 import arcade
 
 from constants import COLUMN_COUNT, HEIGHT, MARGIN, ROW_COUNT, WIDTH
-
 
 EMPTY = arcade.color.WHITE
 SNAKE = arcade.color.SPRING_GREEN
@@ -11,9 +11,9 @@ DECOY = arcade.color.ANTIQUE_RUBY
 GAME_OVER = arcade.color.RED
 EXCELLENT = arcade.color.GREEN
 
-start_margin = 6
+START_MARGIN = 6
 
-cell_code_to_color_map = {0: EMPTY, 1: SNAKE, 2: DECOY, 3: GAME_OVER, 4: EXCELLENT}
+CELL_CODE_TO_COLOR_MAP = {0: EMPTY, 1: SNAKE, 2: DECOY, 3: GAME_OVER, 4: EXCELLENT}
 
 
 def create_cell_list() -> list:
@@ -33,23 +33,21 @@ def create_cell_list() -> list:
     return list_representation
 
 
-def generate_start_coordinates() -> tuple:
+class RandomCellGenerator:
     """
-    Use unmutable type
-    :return:
+    Random cell generator for create new decoy
     """
-    x, y = random.randint(start_margin, COLUMN_COUNT - start_margin), random.randint(
-        start_margin, ROW_COUNT - start_margin
-    )
-    return x, y
+
+    def __call__(self) -> Tuple[int, int]:
+        x_coord, y_coord = random.randint(START_MARGIN, COLUMN_COUNT - START_MARGIN), random.randint(
+            START_MARGIN, ROW_COUNT - START_MARGIN
+        )
+        return x_coord, y_coord
 
 
 def create_grid(list_representation: list) -> arcade.SpriteList:
     """
     Create grid with generated above 2-dim list
-
-    :param list_representation: cells 2-dim list
-    :return: SpriteList
     """
 
     grid = arcade.SpriteList()
@@ -59,7 +57,7 @@ def create_grid(list_representation: list) -> arcade.SpriteList:
             x_coord = (MARGIN + WIDTH) * value_index + MARGIN + WIDTH // 2
             y_coord = (MARGIN + HEIGHT) * row_index + MARGIN + HEIGHT // 2
 
-            color = cell_code_to_color_map[value]
+            color = CELL_CODE_TO_COLOR_MAP[value]
 
             circle = arcade.SpriteCircle(WIDTH // 2, color)
             circle.center_x = x_coord

@@ -1,16 +1,30 @@
+"""
+Simple Snake game
+"""
+
 import random
 from enum import Enum
+from typing import Optional, Tuple, Type
 
 import arcade
 
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, ROW_COUNT, COLUMN_COUNT, GAME_VIEW_UPDATE_RATE
-from utils import create_grid, create_cell_list, generate_start_coordinates
+from constants import (
+    COLUMN_COUNT,
+    GAME_VIEW_UPDATE_RATE,
+    ROW_COUNT,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    TITLE,
+)
+from utils import RandomCellGenerator, create_cell_list, create_grid
 
 EMPTY = arcade.color.WHITE
 FILLED = arcade.color.RED
 
 
 class SnakeMoveDirection(Enum):
+    """Enum for mode direction"""
+
     LEFT = "LEFT"
     RIGHT = "RIGHT"
     UP = "UP"
@@ -22,8 +36,18 @@ cell_type_to_color_code = {"EMPTY": 0, "SNAKE": 1, "DECOY": 2, "GAME_OVER": 3, "
 
 
 class Snake:
-    def __init__(self, board: list, random_cell_generator, snake_head_coord=None, decoy_coords=None):
-        self.random_cell_generator = random_cell_generator
+    """
+    Snake movement and decoy creation logic
+    """
+
+    def __init__(
+        self,
+        board: list,
+        random_cell_generator: Type[RandomCellGenerator],
+        snake_head_coord: Optional[Tuple[int, int]] = None,
+        decoy_coords: Optional[Tuple[int, int]] = None,
+    ):
+        self.random_cell_generator = random_cell_generator()
 
         self.snake_cells_coordinates = [snake_head_coord] if snake_head_coord else [self.random_cell_generator()]
         self.decoy_cell_coordinates = decoy_coords or self.random_cell_generator()
@@ -33,14 +57,14 @@ class Snake:
         self.set_up_coordinates_for_cell_type(self.snake_cells_coordinates[0], cell_type_to_color_code["SNAKE"])
         self.set_up_coordinates_for_cell_type(self.decoy_cell_coordinates, cell_type_to_color_code["DECOY"])
 
-    def set_up_coordinates_for_cell_type(self, coordinates, color):
+    def set_up_coordinates_for_cell_type(self, coordinates: Tuple[int, int], color: int) -> None:
         coord_x, coord_y = coordinates
         self.board[coord_x][coord_y] = color
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.snake_cells_coordinates)
 
-    def change_direction(self, symbol: int):
+    def change_direction(self, symbol: int) -> None:
         if symbol == arcade.key.W and self.direction != SnakeMoveDirection.DOWN.value:
             self.direction = SnakeMoveDirection.UP.value
         elif symbol == arcade.key.S and self.direction != SnakeMoveDirection.UP.value:
@@ -50,44 +74,42 @@ class Snake:
         elif symbol == arcade.key.D and self.direction != SnakeMoveDirection.LEFT.value:
             self.direction = SnakeMoveDirection.RIGHT.value
 
-    def check_snake_on_borders(self, head_coordinates):
+    def check_snake_on_borders(self, head_coordinates: Tuple[int, int]) -> bool:
         head_x, head_y = head_coordinates
+        inside_borders = True
 
         if head_y == 0 and self.direction == SnakeMoveDirection.LEFT.value:
-            raise ValueError
+            inside_borders = False
         elif head_y >= ROW_COUNT and self.direction == SnakeMoveDirection.RIGHT.value:
-            raise ValueError
+            inside_borders = False
         elif head_x == 0 and self.direction == SnakeMoveDirection.UP.value:
-            raise ValueError
+            inside_borders = False
         elif head_x >= COLUMN_COUNT and self.direction == SnakeMoveDirection.DOWN.value:
+            inside_borders = False
+
+        if not inside_borders:
             raise ValueError
+        return inside_borders
 
-        return True
-
-    def check_self_eat(self, head_coordinates):
+    def check_self_eat(self, head_coordinates: Tuple[int, int]) -> None:
         if head_coordinates in self.snake_cells_coordinates:
             raise ValueError
 
-    def create_new_decoy(self):
+    def create_new_decoy(self) -> None:
         if len(self) >= (ROW_COUNT * COLUMN_COUNT) - 1:
             raise ArithmeticError
 
         while True:
             new_decoy = self.random_cell_generator()
-            if new_decoy in self.snake_cells_coordinates:
-                continue
-            else:
+            if new_decoy not in self.snake_cells_coordinates:
                 break
 
         self.decoy_cell_coordinates = new_decoy
         self.set_up_coordinates_for_cell_type(self.decoy_cell_coordinates, cell_type_to_color_code["DECOY"])
 
-    def create_new_head_element(self, current_head: tuple) -> tuple:
+    def create_new_head_element(self, current_head: Tuple[int, int]) -> Tuple[int, int]:
         """
         Using tuple to prevent list deepcopy
-
-        :param current_head:
-        :return:
         """
 
         if self.direction == SnakeMoveDirection.LEFT.value:
@@ -101,10 +123,10 @@ class Snake:
 
         return current_head
 
-    def move(self):
+    def move(self) -> None:
         head_coordinates = self.snake_cells_coordinates[0]
-
         self.check_snake_on_borders(head_coordinates)
+
         head_coordinates = self.create_new_head_element(head_coordinates)
         self.check_self_eat(head_coordinates)
 
@@ -117,36 +139,34 @@ class Snake:
         else:
             self.create_new_decoy()
 
-    def game_over(self, status_code=cell_type_to_color_code["GAME_OVER"]):
+    def game_over(self, status_code: int = cell_type_to_color_code["GAME_OVER"]) -> None:
         for index_x, row in enumerate(self.board):
-            for index_y, col in enumerate(row):
+            for index_y, _ in enumerate(row):
                 if index_y == 0 or index_x == 0 or index_x >= ROW_COUNT - 1 or index_y >= COLUMN_COUNT - 1:
                     self.board[index_x][index_y] = status_code
 
 
 class SnakeGame(arcade.Window):
-    def __init__(self, width, height, title):
+    """Game launcher"""
+
+    def __init__(self, width: int, height: int, title: str):
         super().__init__(width, height, title)
         arcade.set_background_color(arcade.color.BLACK)
 
-        self.shape_grid = None
-        self.snake = Snake(create_cell_list(), generate_start_coordinates)
+        self.shape_grid = arcade.SpriteList()
+        self.snake = Snake(create_cell_list(), RandomCellGenerator)
         self.update_grid()
 
         self.set_update_rate(GAME_VIEW_UPDATE_RATE)
 
-    def increase_update_rate(self):
-        if self.update_rate > 1:
-            self.update_rate -= 1
-
-    def on_draw(self):
+    def on_draw(self) -> None:
         arcade.start_render()
         self.shape_grid.draw()
 
-    def update_grid(self):
+    def update_grid(self) -> None:
         self.shape_grid = create_grid(self.snake.board)
 
-    def on_update(self, delta_time: float):
+    def on_update(self, delta_time: float) -> None:
         try:
             self.snake.move()
         except IndexError:
@@ -161,7 +181,7 @@ class SnakeGame(arcade.Window):
 
         self.update_grid()
 
-    def on_key_press(self, symbol: int, modifiers: int):
+    def on_key_press(self, symbol: int, modifiers: int) -> None:
         self.snake.change_direction(symbol)
 
 
