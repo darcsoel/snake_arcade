@@ -16,16 +16,16 @@ START_MARGIN = 6
 CELL_CODE_TO_COLOR_MAP = {0: EMPTY, 1: SNAKE, 2: DECOY, 3: GAME_OVER, 4: EXCELLENT}
 
 
-def create_cell_list() -> list:
+def create_cell_list() -> list[list[int]]:
     """
     Generate random 2-dim list with alive or dead cells
     :return: list
     """
 
-    list_representation = []
+    list_representation: list[list[int]] = []
 
     for _ in range(ROW_COUNT):
-        column_repr = []
+        column_repr: list[int] = []
         for _ in range(COLUMN_COUNT):
             column_repr.append(0)  # label for empty cell
         list_representation.append(column_repr)
@@ -45,7 +45,7 @@ class RandomCellGenerator:
         return x_coord, y_coord
 
 
-def create_grid(list_representation: list) -> arcade.SpriteList:
+def create_grid(list_representation: list[list[int]]) -> arcade.SpriteList:
     """
     Create grid with generated above 2-dim list
     """
