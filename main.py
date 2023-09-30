@@ -3,6 +3,8 @@ Simple Snake game
 """
 
 import random
+from collections import deque
+from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Tuple, Type
 
@@ -31,8 +33,13 @@ class SnakeMoveDirection(Enum):
     DOWN = "DOWN"
 
 
-# would be nice to move to container
-cell_type_to_color_code = {"EMPTY": 0, "SNAKE": 1, "DECOY": 2, "GAME_OVER": 3, "EXCELLENT": 4}
+@dataclass
+class CellType:
+    EMPTY = 0
+    SNAKE = 1
+    DECOY = 2
+    GAME_OVER = 3
+    EXCELLENT = 4
 
 
 class Snake:
@@ -42,20 +49,22 @@ class Snake:
 
     def __init__(
         self,
-        board: list,
+        board: list[list[int]],
         random_cell_generator: Type[RandomCellGenerator],
         snake_head_coord: Optional[Tuple[int, int]] = None,
         decoy_coords: Optional[Tuple[int, int]] = None,
     ):
         self.random_cell_generator = random_cell_generator()
 
-        self.snake_cells_coordinates = [snake_head_coord] if snake_head_coord else [self.random_cell_generator()]
+        self.snake_cells_coordinates = (
+            deque([snake_head_coord]) if snake_head_coord else deque([self.random_cell_generator()])
+        )
         self.decoy_cell_coordinates = decoy_coords or self.random_cell_generator()
         self.direction = random.choice([s.value for s in SnakeMoveDirection])
 
         self.board = board
-        self.set_up_coordinates_for_cell_type(self.snake_cells_coordinates[0], cell_type_to_color_code["SNAKE"])
-        self.set_up_coordinates_for_cell_type(self.decoy_cell_coordinates, cell_type_to_color_code["DECOY"])
+        self.set_up_coordinates_for_cell_type(self.snake_cells_coordinates[0], CellType.SNAKE)
+        self.set_up_coordinates_for_cell_type(self.decoy_cell_coordinates, CellType.DECOY)
 
     def set_up_coordinates_for_cell_type(self, coordinates: Tuple[int, int], color: int) -> None:
         coord_x, coord_y = coordinates
@@ -105,7 +114,7 @@ class Snake:
                 break
 
         self.decoy_cell_coordinates = new_decoy
-        self.set_up_coordinates_for_cell_type(self.decoy_cell_coordinates, cell_type_to_color_code["DECOY"])
+        self.set_up_coordinates_for_cell_type(self.decoy_cell_coordinates, CellType.DECOY)
 
     def create_new_head_element(self, current_head: Tuple[int, int]) -> Tuple[int, int]:
         """
@@ -131,15 +140,15 @@ class Snake:
         self.check_self_eat(head_coordinates)
 
         self.set_up_coordinates_for_cell_type(head_coordinates, 1)
-        self.snake_cells_coordinates.insert(0, head_coordinates)
+        self.snake_cells_coordinates.appendleft(head_coordinates)
 
         if head_coordinates != self.decoy_cell_coordinates:
             last = self.snake_cells_coordinates.pop()
-            self.set_up_coordinates_for_cell_type(last, cell_type_to_color_code["EMPTY"])
+            self.set_up_coordinates_for_cell_type(last, CellType.EMPTY)
         else:
             self.create_new_decoy()
 
-    def game_over(self, status_code: int = cell_type_to_color_code["GAME_OVER"]) -> None:
+    def game_over(self, status_code: int = CellType.GAME_OVER) -> None:
         for index_x, row in enumerate(self.board):
             for index_y, _ in enumerate(row):
                 if index_y == 0 or index_x == 0 or index_x >= ROW_COUNT - 1 or index_y >= COLUMN_COUNT - 1:
@@ -176,7 +185,7 @@ class SnakeGame(arcade.Window):
             self.snake.game_over()
             self.set_update_rate(10**9)
         except ArithmeticError:
-            self.snake.game_over(cell_type_to_color_code["EXCELLENT"])
+            self.snake.game_over(CellType.EXCELLENT)
             self.set_update_rate(10**9)
 
         self.update_grid()
