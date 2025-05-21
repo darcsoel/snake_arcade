@@ -10,14 +10,7 @@ from typing import Optional, Tuple, Type
 
 import arcade
 
-from constants import (
-    COLUMN_COUNT,
-    GAME_VIEW_UPDATE_RATE,
-    ROW_COUNT,
-    SCREEN_HEIGHT,
-    SCREEN_WIDTH,
-    TITLE,
-)
+from constants import COLUMN_COUNT, GAME_VIEW_UPDATE_RATE, ROW_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE
 from utils import RandomCellGenerator, create_cell_list, create_grid
 
 EMPTY = arcade.color.WHITE
@@ -162,14 +155,13 @@ class SnakeGame(arcade.Window):
         super().__init__(width, height, title)
         arcade.set_background_color(arcade.color.BLACK)
 
-        self.shape_grid = arcade.SpriteList()
+        self.shape_grid = arcade.SpriteList()  # type: ignore[var-annotated]
         self.snake = Snake(create_cell_list(), RandomCellGenerator)
         self.update_grid()
 
         self.set_update_rate(GAME_VIEW_UPDATE_RATE)
 
     def on_draw(self) -> None:
-        arcade.start_render()
         self.shape_grid.draw()
 
     def update_grid(self) -> None:

@@ -1,4 +1,4 @@
-default_stages: [commit, push]
+default_stages: [pre-commit, pre-push]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.3.0
@@ -13,27 +13,27 @@ repos:
     hooks:
     - id: black
       name: black
-      entry: black
+      entry: poetry run black
       language: system
       exclude: ^(venv/|docs/)
       types: ['python']
 
     - id: isort
       name: isort
-      entry: isort
+      entry: poetry run isort
       language: system
       exclude: ^(venv/|docs/)
       types: ['python']
 
     - id: pylint
       name: pylint
-      entry: pylint
+      entry: poetry run pylint
       language: system
       types: ['python']
 
     - id: bandit
       name: bandit
-      entry: bandit
+      entry: poetry run bandit
       args: ['-c',  'pyproject.toml']
       language: system
       types: ['python']
@@ -41,13 +41,13 @@ repos:
     - id: xenon
       name: xenon
       args: [--max-absolute B --max-modules A --max-average A]
-      entry: xenon
+      entry: poetry run xenon
       language: python
       types: ['text']
 
     - id: mypy
       name: mypy
-      entry: mypy
+      entry: poetry run mypy
       language: system
       'types_or': [ python, pyi ]
       args: [ "--ignore-missing-imports", "--scripts-are-modules" ]

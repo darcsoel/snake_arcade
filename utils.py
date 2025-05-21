@@ -50,7 +50,7 @@ def create_grid(list_representation: list[list[int]]) -> arcade.SpriteList:
     Create grid with generated above 2-dim list
     """
 
-    grid = arcade.SpriteList()
+    grid = arcade.SpriteList()  # type: ignore[var-annotated]
 
     for row_index, row in enumerate(list_representation):
         for value_index, value in enumerate(row):
