@@ -2,7 +2,15 @@
     "python.testing.pytestArgs": [
         "."
     ],
+    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.inlayHints.callArgumentNames": "all",
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.variableTypes": true,
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.analysis.typeCheckingMode": "strict"
+    "pylint.args": ["-rcfile=pyproject.toml"],
+    "mypy-type-checker.args": ["--config-file=pyproject.toml"]
 }
